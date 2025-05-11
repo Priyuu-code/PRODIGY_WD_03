@@ -1,0 +1,88 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const gameBoard = document.getElementById('gameBoard');
+    const cells = document.querySelectorAll('.cell');
+    const restartButton = document.getElementById('restartButton');
+    const player1Select = document.getElementById('player1');
+    const player2Select = document.getElementById('player2');
+    const startGameButton = document.getElementById('startGameButton');
+    const playerSelection = document.getElementById('playerSelection');
+    const gameMessage = document.getElementById('gameMessage');
+
+    let player1 = 'X';
+    let player2 = 'O';
+    let currentPlayer = player1;
+    let gameState = Array(9).fill(null);
+    let gameActive = false;
+
+    const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
+
+    function handleCellClick(event) {
+        const cell = event.target;
+        const cellIndex = cell.getAttribute('data-index');
+
+        if (gameState[cellIndex] !== null || !gameActive) {
+            return;
+        }
+
+        gameState[cellIndex] = currentPlayer;
+        cell.textContent = currentPlayer;
+
+        if (checkWin()) {
+            gameActive = false;
+            gameMessage.textContent = `Player ${currentPlayer} wins!`;
+            gameMessage.style.display = 'block';
+        } else if (gameState.every(cell => cell !== null)) {
+            gameActive = false;
+            gameMessage.textContent = 'It\'s a draw!';
+            gameMessage.style.display = 'block';
+        } else {
+            currentPlayer = currentPlayer === player1 ? player2 : player1;
+        }
+    }
+
+    function checkWin() {
+        return winningConditions.some(condition => {
+            return condition.every(index => gameState[index] === currentPlayer);
+        });
+    }
+
+    function restartGame() {
+        currentPlayer = player1;
+        gameState = Array(9).fill(null);
+        gameActive = true;
+        cells.forEach(cell => cell.textContent = '');
+        gameMessage.style.display = 'none';
+        gameBoard.style.display = 'grid';
+        restartButton.style.display = 'inline-block';
+    }
+
+    function startGame() {
+        player1 = player1Select.value;
+        player2 = player2Select.value;
+        if (player1 === player2) {
+            alert('Player 1 and Player 2 cannot choose the same marker.');
+            return;
+        }
+        currentPlayer = player1;
+        gameState = Array(9).fill(null);
+        gameActive = true;
+        cells.forEach(cell => cell.textContent = '');
+        playerSelection.style.display = 'none';
+        gameBoard.style.display = 'grid';
+        restartButton.style.display = 'inline-block';
+        gameMessage.style.display = 'none';
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+    restartButton.addEventListener('click', restartGame);
+    startGameButton.addEventListener('click', startGame);
+});
